@@ -5,16 +5,38 @@ const API_URL = `http://localhost:8080`;
 
 class Auth extends React.Component {
   state = {
-    username: "",
-    password: "",
     selectedFile: null,
+    formUser: {
+      username: "",
+      password: "",
+    },
+    loginState: {
+      username: "",
+      password: "",
+      profilePicture: "",
+    },
+  };
+
+  loginHandler = () => {
+    alert("Login!");
+    Axios.post(`${API_URL}/documents/login`, this.state.formUser)
+      .then((res) => {
+        console.log(res.data);
+        this.setState({ loginState: res.data });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   inputHandler = (event, key) => {
     const { value } = event.target;
 
     this.setState({
-      [key]: value,
+      formUser: {
+        ...this.state.formUser,
+        [key]: value,
+      },
     });
   };
 
@@ -23,22 +45,6 @@ class Auth extends React.Component {
     Axios.post(`${API_URL}/users`, {
       username: this.state.username,
       password: this.state.password,
-    })
-      .then((res) => {
-        console.log(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  loginHandler = () => {
-    alert("Login!");
-    Axios.get(`${API_URL}/users/login`, {
-      params: {
-        username: this.state.username,
-        password: this.state.password,
-      },
     })
       .then((res) => {
         console.log(res.data);
@@ -60,6 +66,7 @@ class Auth extends React.Component {
       this.state.selectedFile,
       this.state.selectedFile.name
     );
+    formData.append("userData", JSON.stringify(this.state.formUser));
 
     Axios.post(`${API_URL}/documents`, formData)
       .then((res) => {
@@ -69,6 +76,9 @@ class Auth extends React.Component {
         console.log("ERROR");
         console.log(err);
       });
+
+    console.log(this.state.formUser);
+    console.log(JSON.stringify(this.state.formUser));
   };
 
   download = () => {
@@ -94,6 +104,9 @@ class Auth extends React.Component {
         <input type="button" value="Upload" onClick={this.fileUploadHandler} />
         <br />
         <input type="button" value="Download" onClick={this.download} />
+        <hr />
+        <h2>{this.state.loginState.username}</h2>
+        <img src={this.state.loginState.profilePicture} alt="" />
       </div>
     );
   }
